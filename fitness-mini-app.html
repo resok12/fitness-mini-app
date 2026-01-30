@@ -1,0 +1,1552 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Fitness Pro</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0A0A0A;
+            --bg-secondary: #1A1A1A;
+            --bg-card: #242424;
+            --text-primary: #FAFAFA;
+            --text-secondary: #A0A0A0;
+            --accent: #1A5F3F;
+            --accent-light: #2A7F5F;
+            --border: #333333;
+            --success: #4CAF50;
+            --warning: #FFA726;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            padding-bottom: 80px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-secondary);
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title {
+            font-size: 20px;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+        }
+
+        .header-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        /* Main Content */
+        .content {
+            margin-top: 65px;
+            padding: 20px;
+            min-height: calc(100vh - 145px);
+        }
+
+        .section {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:active {
+            transform: scale(0.98);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .stat-item {
+            background: var(--bg-secondary);
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .stat-unit {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-left: 4px;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            margin: 16px 0;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--accent);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        /* Buttons */
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:active {
+            background: var(--accent-light);
+            transform: scale(0.98);
+        }
+
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        /* List Items */
+        .list-item {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            margin-bottom: 8px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .list-item:active {
+            transform: scale(0.98);
+        }
+
+        .list-item-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-right: 16px;
+        }
+
+        .list-item-content {
+            flex: 1;
+        }
+
+        .list-item-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .list-item-subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .list-item-arrow {
+            color: var(--text-secondary);
+            font-size: 20px;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .empty-state-subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0 12px;
+            z-index: 100;
+        }
+
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: color 0.2s;
+            border: none;
+            background: none;
+        }
+
+        .nav-item.active {
+            color: var(--accent);
+        }
+
+        .nav-icon {
+            font-size: 24px;
+        }
+
+        .nav-label {
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: rgba(76, 175, 80, 0.2);
+            color: var(--success);
+        }
+
+        .badge-warning {
+            background: rgba(255, 167, 38, 0.2);
+            color: var(--warning);
+        }
+
+        /* Day Selector */
+        .day-selector {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 8px 0;
+            margin-bottom: 16px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .day-selector::-webkit-scrollbar {
+            display: none;
+        }
+
+        .day-chip {
+            min-width: 60px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .day-chip.active {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .day-name {
+            font-size: 12px;
+            font-weight: 600;
+            display: block;
+        }
+
+        .day-date {
+            font-size: 10px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        .day-chip.active .day-date {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Circular Progress */
+        .circular-progress {
+            display: flex;
+            justify-content: space-around;
+            margin: 24px 0;
+        }
+
+        .progress-circle {
+            text-align: center;
+        }
+
+        .circle-svg {
+            transform: rotate(-90deg);
+        }
+
+        .circle-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+
+        .circle-value {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: flex-end;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--bg-secondary);
+            border-radius: 24px 24px 0 0;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 24px 20px 40px;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .modal-title {
+            font-size: 22px;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            border: none;
+            color: var(--text-primary);
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 16px;
+            font-family: inherit;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        textarea.form-input {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        /* Range Slider */
+        .range-slider {
+            width: 100%;
+            margin: 16px 0;
+        }
+
+        .range-value {
+            text-align: center;
+            font-size: 32px;
+            font-weight: 600;
+            color: var(--accent);
+            margin: 16px 0;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: var(--bg-card);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+            border: none;
+        }
+
+        /* Checkbox */
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            background: var(--bg-card);
+            border-radius: 12px;
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+
+        .checkbox {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            border: 2px solid var(--border);
+            margin-right: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .checkbox.checked {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .checkbox.checked::after {
+            content: '✓';
+            color: white;
+            font-size: 16px;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            left: 20px;
+            right: 20px;
+            background: var(--accent);
+            color: white;
+            padding: 16px 20px;
+            border-radius: 12px;
+            display: none;
+            align-items: center;
+            gap: 12px;
+            z-index: 2000;
+            animation: slideUp 0.3s ease;
+        }
+
+        .toast.show {
+            display: flex;
+        }
+
+        /* File Upload */
+        .file-upload {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-upload input[type=file] {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .file-upload-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 16px;
+            background: var(--bg-card);
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .file-upload-label:hover {
+            border-color: var(--accent);
+        }
+
+        /* Image Preview */
+        .image-preview {
+            margin-top: 16px;
+            border-radius: 12px;
+            overflow: hidden;
+            display: none;
+        }
+
+        .image-preview img {
+            width: 100%;
+            display: block;
+        }
+
+        /* Exercise Timer */
+        .timer-display {
+            text-align: center;
+            font-size: 48px;
+            font-weight: 600;
+            margin: 32px 0;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .timer-controls {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .timer-btn {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .timer-btn.start {
+            background: var(--accent);
+        }
+
+        .timer-btn.pause {
+            background: var(--warning);
+        }
+
+        .timer-btn.reset {
+            background: var(--bg-card);
+        }
+
+        /* Body Pain Map */
+        .body-map {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin: 16px 0;
+        }
+
+        .body-part {
+            padding: 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .body-part.selected {
+            background: rgba(255, 167, 38, 0.2);
+            border-color: var(--warning);
+            color: var(--warning);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-content">
+            <div class="header-title" id="headerTitle">Мои данные</div>
+            <div class="header-icon">💪</div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content">
+        <!-- Мои данные -->
+        <div id="profile" class="section active">
+            <div class="card">
+                <div class="card-title">👤 Профиль</div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-label">Текущий вес</div>
+                        <div class="stat-value">75<span class="stat-unit">кг</span></div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Целевой вес</div>
+                        <div class="stat-value">70<span class="stat-unit">кг</span></div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Рост</div>
+                        <div class="stat-value">175<span class="stat-unit">см</span></div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Возраст</div>
+                        <div class="stat-value">28<span class="stat-unit">лет</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">📏 Замеры тела</div>
+                <div class="card-subtitle">Последнее обновление: 15 января 2026</div>
+                
+                <div class="list-item">
+                    <div class="list-item-content">
+                        <div class="list-item-title">Грудь</div>
+                        <div class="list-item-subtitle">95 см</div>
+                    </div>
+                </div>
+                <div class="list-item">
+                    <div class="list-item-content">
+                        <div class="list-item-title">Талия</div>
+                        <div class="list-item-subtitle">82 см</div>
+                    </div>
+                </div>
+                <div class="list-item">
+                    <div class="list-item-content">
+                        <div class="list-item-title">Бедра</div>
+                        <div class="list-item-subtitle">98 см</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">📊 Прогресс веса</div>
+                <div class="progress-container">
+                    <div class="progress-header">
+                        <span>До цели</span>
+                        <span style="color: var(--accent);">5 кг</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 60%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" onclick="openMeasurementModal()">
+                <span>✏️</span>
+                Добавить замер
+            </button>
+        </div>
+
+        <!-- Питание -->
+        <div id="nutrition" class="section">
+            <div class="day-selector">
+                <div class="day-chip">
+                    <span class="day-name">ПН</span>
+                    <span class="day-date">27 янв</span>
+                </div>
+                <div class="day-chip active">
+                    <span class="day-name">ВТ</span>
+                    <span class="day-date">28 янв</span>
+                </div>
+                <div class="day-chip">
+                    <span class="day-name">СР</span>
+                    <span class="day-date">29 янв</span>
+                </div>
+                <div class="day-chip">
+                    <span class="day-name">ЧТ</span>
+                    <span class="day-date">30 янв</span>
+                </div>
+                <div class="day-chip">
+                    <span class="day-name">ПТ</span>
+                    <span class="day-date">31 янв</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">🎯 КБЖУ на сегодня</div>
+                <div class="circular-progress">
+                    <div class="progress-circle">
+                        <svg width="80" height="80">
+                            <circle cx="40" cy="40" r="35" fill="none" stroke="#333" stroke-width="8"/>
+                            <circle cx="40" cy="40" r="35" fill="none" stroke="#1A5F3F" stroke-width="8" 
+                                    stroke-dasharray="220" stroke-dashoffset="55" class="circle-svg"/>
+                        </svg>
+                        <div class="circle-label">Калории</div>
+                        <div class="circle-value">1650/2000</div>
+                    </div>
+                    <div class="progress-circle">
+                        <svg width="80" height="80">
+                            <circle cx="40" cy="40" r="35" fill="none" stroke="#333" stroke-width="8"/>
+                            <circle cx="40" cy="40" r="35" fill="none" stroke="#4CAF50" stroke-width="8" 
+                                    stroke-dasharray="220" stroke-dashoffset="88" class="circle-svg"/>
+                        </svg>
+                        <div class="circle-label">Белки</div>
+                        <div class="circle-value">90/150г</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">🍳 Завтрак <span class="badge badge-success">Выполнено</span></div>
+                <div class="card-subtitle">Омлет с овощами • 450 ккал</div>
+                <div style="margin-top: 12px; color: var(--text-secondary); font-size: 14px;">
+                    ✅ Съедено в 08:30
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">🥗 Обед</div>
+                <div class="card-subtitle">Куриная грудка с рисом • 550 ккал</div>
+                <button class="btn btn-secondary" style="margin-top: 12px;" onclick="markMealEaten('lunch')">
+                    <span>📸</span>
+                    Отметить как съеденное
+                </button>
+            </div>
+
+            <div class="card">
+                <div class="card-title">💧 Вода</div>
+                <div class="progress-container">
+                    <div class="progress-header">
+                        <span id="waterProgress">1.5 / 2.5 литра</span>
+                        <span id="waterPercent">60%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="waterBar" style="width: 60%;"></div>
+                    </div>
+                </div>
+                <button class="btn btn-secondary" style="margin-top: 12px;" onclick="addWater()">
+                    + Добавить стакан (250 мл)
+                </button>
+            </div>
+        </div>
+
+        <!-- Состояние -->
+        <div id="condition" class="section">
+            <div class="card">
+                <div class="card-title">😴 Сон</div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-label">Продолжительность</div>
+                        <div class="stat-value">7<span class="stat-unit">ч 30м</span></div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Качество</div>
+                        <div class="stat-value">8<span class="stat-unit">/10</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">😌 Уровень стресса</div>
+                <div class="progress-container">
+                    <div class="progress-header">
+                        <span>Низкий</span>
+                        <span style="color: var(--success);">3/10</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 30%; background: var(--success);"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">⚡ Энергия</div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-label">Физическая</div>
+                        <div class="stat-value">7<span class="stat-unit">/10</span></div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Ментальная</div>
+                        <div class="stat-value">8<span class="stat-unit">/10</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">💪 Мышечная боль</div>
+                <div class="card-subtitle">Нажмите на зоны, где чувствуете дискомфорт</div>
+                <div style="text-align: center; padding: 20px; font-size: 48px;">
+                    🧍‍♂️
+                </div>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px;">
+                    <span class="badge badge-warning">Плечи</span>
+                    <span class="badge badge-warning">Спина</span>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" onclick="openConditionModal()">
+                Обновить состояние
+            </button>
+        </div>
+
+        <!-- Тренировки -->
+        <div id="workouts" class="section">
+            <div class="card">
+                <div class="card-title">🗓️ Сегодня: День 1 - Верх тела</div>
+                <div class="card-subtitle">Длительность: ~60 минут</div>
+                <div class="progress-container">
+                    <div class="progress-header">
+                        <span>Прогресс</span>
+                        <span>0/6 упражнений</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 0%;"></div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" style="margin-top: 16px;" onclick="startWorkout()">
+                    <span>▶️</span>
+                    Начать тренировку
+                </button>
+            </div>
+
+            <div class="card">
+                <div class="card-title">📋 Программа тренировок</div>
+                
+                <div class="list-item" onclick="openExerciseModal('Жим штанги лежа', '4 подхода × 12 повторений')">
+                    <div class="list-item-icon">1️⃣</div>
+                    <div class="list-item-content">
+                        <div class="list-item-title">Жим штанги лежа</div>
+                        <div class="list-item-subtitle">4 подхода × 12 повторений</div>
+                    </div>
+                    <div class="list-item-arrow">▶️</div>
+                </div>
+
+                <div class="list-item" onclick="openExerciseModal('Тяга верхнего блока', '3 подхода × 15 повторений')">
+                    <div class="list-item-icon">2️⃣</div>
+                    <div class="list-item-content">
+                        <div class="list-item-title">Тяга верхнего блока</div>
+                        <div class="list-item-subtitle">3 подхода × 15 повторений</div>
+                    </div>
+                    <div class="list-item-arrow">▶️</div>
+                </div>
+
+                <div class="list-item" onclick="openExerciseModal('Жим гантелей сидя', '3 подхода × 12 повторений')">
+                    <div class="list-item-icon">3️⃣</div>
+                    <div class="list-item-content">
+                        <div class="list-item-title">Жим гантелей сидя</div>
+                        <div class="list-item-subtitle">3 подхода × 12 повторений</div>
+                    </div>
+                    <div class="list-item-arrow">▶️</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">📈 Статистика</div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-label">На этой неделе</div>
+                        <div class="stat-value">3<span class="stat-unit">тренировки</span></div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Всего</div>
+                        <div class="stat-value">24<span class="stat-unit">тренировки</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Чат -->
+        <div id="chat" class="section">
+            <div class="card">
+                <div class="list-item" style="margin-bottom: 0;">
+                    <div class="list-item-icon">👨‍🏫</div>
+                    <div class="list-item-content">
+                        <div class="list-item-title">Иван Петров</div>
+                        <div class="list-item-subtitle">Ваш тренер • Онлайн</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">💬 Быстрые действия</div>
+                
+                <button class="btn btn-secondary" style="margin-bottom: 12px;" onclick="quickAction('measurements')">
+                    📸 Отправить фото замеров
+                </button>
+                <button class="btn btn-secondary" style="margin-bottom: 12px;" onclick="quickAction('nutrition')">
+                    🍽️ Отправить дневник питания
+                </button>
+                <button class="btn btn-secondary" style="margin-bottom: 12px;" onclick="quickAction('video')">
+                    🎥 Отправить видео упражнения
+                </button>
+                <button class="btn btn-secondary" onclick="quickAction('call')">
+                    📅 Запланировать созвон
+                </button>
+            </div>
+
+            <div class="empty-state">
+                <div class="empty-state-icon">💬</div>
+                <div class="empty-state-title">Начните общение</div>
+                <div class="empty-state-subtitle">Напишите тренеру или используйте<br>быстрые действия выше</div>
+                <button class="btn btn-primary" style="max-width: 200px; margin: 0 auto;" onclick="openChatModal()">
+                    Написать сообщение
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Measurement Modal -->
+    <div id="measurementModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">Добавить замер</div>
+                <button class="modal-close" onclick="closeModal('measurementModal')">✕</button>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Вес (кг)</label>
+                <input type="number" class="form-input" placeholder="75" value="75">
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Грудь (см)</label>
+                    <input type="number" class="form-input" placeholder="95" value="95">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Талия (см)</label>
+                    <input type="number" class="form-input" placeholder="82" value="82">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Бедра (см)</label>
+                    <input type="number" class="form-input" placeholder="98" value="98">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Бицепс (см)</label>
+                    <input type="number" class="form-input" placeholder="35" value="35">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Фото прогресса</label>
+                <div class="file-upload">
+                    <input type="file" id="photoUpload" accept="image/*" onchange="previewImage(event)">
+                    <label for="photoUpload" class="file-upload-label">
+                        <span>📸</span>
+                        <span>Добавить фото</span>
+                    </label>
+                </div>
+                <div id="imagePreview" class="image-preview"></div>
+            </div>
+
+            <button class="btn btn-primary" onclick="saveMeasurement()">
+                Сохранить замер
+            </button>
+        </div>
+    </div>
+
+    <!-- Condition Modal -->
+    <div id="conditionModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">Обновить состояние</div>
+                <button class="modal-close" onclick="closeModal('conditionModal')">✕</button>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">😴 Качество сна</label>
+                <div class="range-value" id="sleepValue">8 / 10</div>
+                <input type="range" min="1" max="10" value="8" class="range-slider" 
+                       oninput="updateRangeValue('sleepValue', this.value, 10)">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">😌 Уровень стресса</label>
+                <div class="range-value" id="stressValue">3 / 10</div>
+                <input type="range" min="1" max="10" value="3" class="range-slider" 
+                       oninput="updateRangeValue('stressValue', this.value, 10)">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">⚡ Физическая энергия</label>
+                <div class="range-value" id="energyValue">7 / 10</div>
+                <input type="range" min="1" max="10" value="7" class="range-slider" 
+                       oninput="updateRangeValue('energyValue', this.value, 10)">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">💪 Мышечная боль</label>
+                <div class="body-map">
+                    <div class="body-part" onclick="toggleBodyPart(this)">Шея</div>
+                    <div class="body-part" onclick="toggleBodyPart(this)">Плечи</div>
+                    <div class="body-part" onclick="toggleBodyPart(this)">Грудь</div>
+                    <div class="body-part selected" onclick="toggleBodyPart(this)">Спина</div>
+                    <div class="body-part" onclick="toggleBodyPart(this)">Пресс</div>
+                    <div class="body-part" onclick="toggleBodyPart(this)">Руки</div>
+                    <div class="body-part" onclick="toggleBodyPart(this)">Ягодицы</div>
+                    <div class="body-part" onclick="toggleBodyPart(this)">Бедра</div>
+                    <div class="body-part" onclick="toggleBodyPart(this)">Икры</div>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" onclick="saveCondition()">
+                Сохранить состояние
+            </button>
+        </div>
+    </div>
+
+    <!-- Exercise Modal -->
+    <div id="exerciseModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title" id="exerciseTitle">Упражнение</div>
+                <button class="modal-close" onclick="closeModal('exerciseModal')">✕</button>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">📹 Демонстрация техники</div>
+                <div style="background: var(--bg-card); border-radius: 12px; padding: 60px 20px; text-align: center; margin-top: 12px;">
+                    <div style="font-size: 48px; margin-bottom: 8px;">🎥</div>
+                    <div style="color: var(--text-secondary);">Видео-инструкция</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">📝 Описание</div>
+                <div class="card-subtitle" id="exerciseDescription">
+                    1. Лягте на скамью, возьмите штангу<br>
+                    2. Опустите штангу к груди<br>
+                    3. Выжмите штангу вверх<br>
+                    4. Повторите
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">⚡ Таймер отдыха</label>
+                <div class="timer-display" id="timerDisplay">01:30</div>
+                <div class="timer-controls">
+                    <button class="timer-btn start" onclick="startTimer()">▶️</button>
+                    <button class="timer-btn pause" onclick="pauseTimer()">⏸️</button>
+                    <button class="timer-btn reset" onclick="resetTimer()">🔄</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Ваше видео упражнения</label>
+                <div class="file-upload">
+                    <input type="file" id="videoUpload" accept="video/*">
+                    <label for="videoUpload" class="file-upload-label">
+                        <span>🎥</span>
+                        <span>Загрузить видео</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Ощущения после подхода</label>
+                <select class="form-input">
+                    <option>😊 Легко</option>
+                    <option selected>💪 Норма</option>
+                    <option>😰 Тяжело</option>
+                </select>
+            </div>
+
+            <button class="btn btn-primary" onclick="completeExercise()">
+                ✓ Завершить упражнение
+            </button>
+        </div>
+    </div>
+
+    <!-- Chat Modal -->
+    <div id="chatModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">Сообщение тренеру</div>
+                <button class="modal-close" onclick="closeModal('chatModal')">✕</button>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Ваше сообщение</label>
+                <textarea class="form-input" placeholder="Напишите сообщение..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Прикрепить файл</label>
+                <div class="file-upload">
+                    <input type="file" id="chatFileUpload" accept="image/*,video/*">
+                    <label for="chatFileUpload" class="file-upload-label">
+                        <span>📎</span>
+                        <span>Добавить фото/видео</span>
+                    </label>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" onclick="sendMessage()">
+                📤 Отправить
+            </button>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <span id="toastIcon">✓</span>
+        <span id="toastMessage">Успешно сохранено!</span>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <button class="nav-item active" onclick="showSection('profile', 'Мои данные', this)">
+            <div class="nav-icon">👤</div>
+            <div class="nav-label">Данные</div>
+        </button>
+        <button class="nav-item" onclick="showSection('nutrition', 'Питание', this)">
+            <div class="nav-icon">🍎</div>
+            <div class="nav-label">Питание</div>
+        </button>
+        <button class="nav-item" onclick="showSection('condition', 'Состояние', this)">
+            <div class="nav-icon">💓</div>
+            <div class="nav-label">Состояние</div>
+        </button>
+        <button class="nav-item" onclick="showSection('workouts', 'Тренировки', this)">
+            <div class="nav-icon">💪</div>
+            <div class="nav-label">Тренировки</div>
+        </button>
+        <button class="nav-item" onclick="showSection('chat', 'Чат', this)">
+            <div class="nav-icon">💬</div>
+            <div class="nav-label">Чат</div>
+        </button>
+    </div>
+
+    <script>
+        // Initialize Telegram Web App
+        let tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.enableClosingConfirmation();
+
+        // Set theme colors
+        document.body.style.backgroundColor = tg.themeParams.bg_color || '#0A0A0A';
+
+        // Show section function
+        function showSection(sectionId, title, navItem) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+
+            // Show selected section
+            document.getElementById(sectionId).classList.add('active');
+
+            // Update header title
+            document.getElementById('headerTitle').textContent = title;
+
+            // Update active nav item
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            navItem.classList.add('active');
+
+            // Haptic feedback
+            if (tg.HapticFeedback) {
+                tg.HapticFeedback.impactOccurred('light');
+            }
+
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Add haptic feedback to all buttons
+        document.querySelectorAll('.btn, .list-item, .day-chip').forEach(element => {
+            element.addEventListener('click', () => {
+                if (tg.HapticFeedback) {
+                    tg.HapticFeedback.impactOccurred('light');
+                }
+            });
+        });
+
+        // Send data to bot (example)
+        function sendDataToBot(data) {
+            tg.sendData(JSON.stringify(data));
+        }
+
+        // Example: Log when user interacts
+        console.log('Fitness Mini App initialized');
+        console.log('User data:', tg.initDataUnsafe.user);
+
+        // === MODAL FUNCTIONS ===
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+            if (tg.HapticFeedback) {
+                tg.HapticFeedback.impactOccurred('medium');
+            }
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+            if (tg.HapticFeedback) {
+                tg.HapticFeedback.impactOccurred('light');
+            }
+        }
+
+        function openMeasurementModal() {
+            openModal('measurementModal');
+        }
+
+        function openConditionModal() {
+            openModal('conditionModal');
+        }
+
+        function openExerciseModal(title, description) {
+            document.getElementById('exerciseTitle').textContent = title;
+            openModal('exerciseModal');
+        }
+
+        function openChatModal() {
+            openModal('chatModal');
+        }
+
+        // Close modal on overlay click
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    overlay.classList.remove('active');
+                }
+            });
+        });
+
+        // === TOAST NOTIFICATION ===
+        function showToast(message, icon = '✓') {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMessage').textContent = message;
+            document.getElementById('toastIcon').textContent = icon;
+            toast.classList.add('show');
+            
+            if (tg.HapticFeedback) {
+                tg.HapticFeedback.notificationOccurred('success');
+            }
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // === PROFILE SECTION ===
+        function saveMeasurement() {
+            closeModal('measurementModal');
+            showToast('Замер успешно сохранен!');
+        }
+
+        function previewImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('imagePreview');
+                    preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // === NUTRITION SECTION ===
+        let waterAmount = 1.5; // литров
+        const waterGoal = 2.5;
+
+        function markMealEaten(mealId) {
+            showToast('Прием пищи отмечен! 📸');
+        }
+
+        function addWater() {
+            waterAmount += 0.25; // добавляем 250мл
+            if (waterAmount > waterGoal) waterAmount = waterGoal;
+            
+            const percentage = (waterAmount / waterGoal) * 100;
+            document.getElementById('waterProgress').textContent = `${waterAmount.toFixed(1)} / ${waterGoal} литра`;
+            document.getElementById('waterPercent').textContent = `${Math.round(percentage)}%`;
+            document.getElementById('waterBar').style.width = `${percentage}%`;
+            
+            showToast('Добавлен стакан воды! 💧');
+        }
+
+        // === CONDITION SECTION ===
+        function updateRangeValue(elementId, value, max) {
+            document.getElementById(elementId).textContent = `${value} / ${max}`;
+        }
+
+        function toggleBodyPart(element) {
+            element.classList.toggle('selected');
+            if (tg.HapticFeedback) {
+                tg.HapticFeedback.impactOccurred('light');
+            }
+        }
+
+        function saveCondition() {
+            closeModal('conditionModal');
+            showToast('Состояние обновлено!');
+        }
+
+        // === WORKOUTS SECTION ===
+        function startWorkout() {
+            showToast('Тренировка начата! 💪', '▶️');
+        }
+
+        function completeExercise() {
+            closeModal('exerciseModal');
+            showToast('Упражнение завершено!');
+        }
+
+        // Timer functionality
+        let timerInterval;
+        let timerSeconds = 90; // 1:30
+        let timerRunning = false;
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function updateTimerDisplay() {
+            document.getElementById('timerDisplay').textContent = formatTime(timerSeconds);
+        }
+
+        function startTimer() {
+            if (!timerRunning) {
+                timerRunning = true;
+                timerInterval = setInterval(() => {
+                    if (timerSeconds > 0) {
+                        timerSeconds--;
+                        updateTimerDisplay();
+                    } else {
+                        pauseTimer();
+                        showToast('Время отдыха закончилось!', '⏰');
+                        if (tg.HapticFeedback) {
+                            tg.HapticFeedback.notificationOccurred('warning');
+                        }
+                    }
+                }, 1000);
+            }
+        }
+
+        function pauseTimer() {
+            timerRunning = false;
+            clearInterval(timerInterval);
+        }
+
+        function resetTimer() {
+            pauseTimer();
+            timerSeconds = 90;
+            updateTimerDisplay();
+            showToast('Таймер сброшен', '🔄');
+        }
+
+        // === CHAT SECTION ===
+        function quickAction(action) {
+            const messages = {
+                'measurements': 'Запрос на отправку замеров отправлен',
+                'nutrition': 'Дневник питания отправлен тренеру',
+                'video': 'Запрос на загрузку видео',
+                'call': 'Запрос на созвон отправлен'
+            };
+            showToast(messages[action] || 'Действие выполнено');
+        }
+
+        function sendMessage() {
+            closeModal('chatModal');
+            showToast('Сообщение отправлено! 📤');
+        }
+
+        // === DATA PERSISTENCE (LocalStorage) ===
+        function saveData(key, value) {
+            localStorage.setItem(key, JSON.stringify(value));
+        }
+
+        function loadData(key) {
+            const data = localStorage.getItem(key);
+            return data ? JSON.parse(data) : null;
+        }
+
+        // Load saved water amount on init
+        const savedWater = loadData('waterAmount');
+        if (savedWater) {
+            waterAmount = savedWater;
+            const percentage = (waterAmount / waterGoal) * 100;
+            document.getElementById('waterProgress').textContent = `${waterAmount.toFixed(1)} / ${waterGoal} литра`;
+            document.getElementById('waterPercent').textContent = `${Math.round(percentage)}%`;
+            document.getElementById('waterBar').style.width = `${percentage}%`;
+        }
+
+        // Save water amount when changed
+        function addWater() {
+            waterAmount += 0.25;
+            if (waterAmount > waterGoal) waterAmount = waterGoal;
+            
+            const percentage = (waterAmount / waterGoal) * 100;
+            document.getElementById('waterProgress').textContent = `${waterAmount.toFixed(1)} / ${waterGoal} литра`;
+            document.getElementById('waterPercent').textContent = `${Math.round(percentage)}%`;
+            document.getElementById('waterBar').style.width = `${percentage}%`;
+            
+            saveData('waterAmount', waterAmount);
+            showToast('Добавлен стакан воды! 💧');
+        }
+    </script>
+</body>
+</html>
