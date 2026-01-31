@@ -1,6 +1,6 @@
 // server.js - Backend для Fitness Mini App
 const express = require('express');
-const mongoose = require('mongoose');
+const { Pool } = require('pg');
 const cors = require('cors');
 const multer = require('multer');
 const path = require('path');
@@ -17,13 +17,17 @@ app.use('/uploads', express.static('uploads'));
 
 // MongoDB Connection
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/fitness-app';
-mongoose.connect(MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-}).then(() => {
-    console.log('✅ Connected to MongoDB');
-}).catch(err => {
-    console.error('❌ MongoDB connection error:', err);
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false }
+});
+
+pool.query('SELECT NOW()', (err, res) => {
+    if (err) {
+        console.error('❌ PostgreSQL connection error:', err);
+    } else {
+        console.log('✅ Connected to PostgreSQL');
+    }
 });
 
 // File Upload Configuration
